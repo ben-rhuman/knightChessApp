@@ -26,17 +26,27 @@ public class KnightChessApp { //Start of KnightChessApp Class
         Stack stack = new Stack(size);
         Knight knight = new Knight(position);
         stack.push(knight);
-
-        while (!stack.isFull()) {
+        b.mark(stack.peak().getPosition());
+        
+        while(!stack.isFull()){
             moves++;
-            if (stack.peak().getNextPos() != -1) {
-                   
-            } else if (stack.isEmpty()) {
-                System.out.print("\nFailure:\nTotal Number of Moves = " + moves + "\nMove Sequence : (" + position + ")");
-            } else {
+            int tempPos = stack.peak().getNextPos();
+            if(tempPos != -1){
+                //stack.peak().cycle--;
+                knight = new Knight(tempPos);
+                stack.push(knight);
+                b.mark(stack.peak().getPosition());
+            } else{
                 b.unmark(stack.pop().getPosition());
             }
-        }
+            if(stack.isFull()){
+                System.out.print("\nSUCCESS:\nTotal Number of Moves = " + moves + "\nMoving Sequence: ");
+                stack.printStack();
+            }else if (stack.isEmpty()){
+                System.out.print("\nFAILURE:\nTotal Number of Moves = " + moves + "\n");
+                break;
+            }
+        }//End While
     }//End of main
 
     private static int getInt() {// Gets board size from user.
@@ -74,7 +84,7 @@ public class KnightChessApp { //Start of KnightChessApp Class
 class Knight {//Starts of Knight class
 
     private int position;
-    private int cycle;
+    public int cycle;
     private int N = Board.getSize();
     private static int[][] moves8 = {{+1, -2}, {+2, -1}, {+2, +1}, {+1, +2}, {-1, +2}, {-2, +1}, {-2, -1}, {-1, -2}};
 
@@ -105,7 +115,7 @@ class Knight {//Starts of Knight class
                 }
             } // end if(x>=0...)
         } // end while // no possible move
-        cycle = 0; // reset move index
+        //cycle = 0; // reset move index
         return -1; // failure
     } // end getNextPos()
 }//End of Knight class
@@ -121,13 +131,13 @@ class Board {//Start of Board class
         this.size = size;
     } // End of Board constructor
 
-    public static void unmark(int position) { //Marks the array spot as false (not occupied)
+    public void unmark(int position) { //Marks the array spot as false (not occupied)
         int x = (position - 1) % size;
         int y = (position - 1) / size;
         chessBoard[x][y] = false;
     } // End of unmark()
 
-    public static void mark(int position) { //Marks the array spota as true (occupied)
+    public void mark(int position) { //Marks the array spota as true (occupied)
         int x = (position - 1) % size;
         int y = (position - 1) / size;
         chessBoard[x][y] = true;
@@ -152,17 +162,17 @@ class Stack {
 
     public Stack(int s) {
         stackArray = new Knight[s * s]; // s*s is equal to the number of positions on the board
-        current = 0;
+        current = -1;
     }// End of Stack constructor
 
     public void push(Knight k) {
-        stackArray[current] = k; //Puts node at the current end of stack
         current++;
+        stackArray[current] = k; //Puts node at the current end of stack
     }//End of push()
 
     public Knight pop() {
         current--; //Moves reference back up stack
-        return stackArray[current + 1]; // Returns the now dereferenced node
+        return stackArray[current+1]; // Returns the now dereferenced node
     }//End of pop()
 
     public Knight peak() {
@@ -170,7 +180,7 @@ class Stack {
     }//End of peak
 
     public boolean isFull() {
-        if (current == stackArray.length) { // is the stack full?
+        if (current == stackArray.length - 1) { // is the stack full?
             return true; //yes
         } else {
             return false; // no
@@ -178,10 +188,16 @@ class Stack {
     }
 
     public boolean isEmpty() {
-        if (current == 0) {
+        if (current == -1) {
             return true;
         } else {
             return false;
+        }
+    }
+    
+    public void printStack(){
+        for(int i = 0; i < stackArray.length; i++){
+            System.out.print(stackArray[i].getPosition() + " ");
         }
     }
 }// End of Stack class
