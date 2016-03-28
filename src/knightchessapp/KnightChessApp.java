@@ -1,5 +1,6 @@
 package knightchessapp;
 
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 /*
@@ -13,22 +14,60 @@ public class KnightChessApp { //Start of KnightChessApp Class
      * @param args the command line arguments
      */
     public static void main(String[] args) {//Start of main
+        System.out.print("\nEnter board size (8 for 8x8 board): ");
+        int size = getInt();
 
-        Board b = new Board(size()); //Creates board class
-        Stack stack = new Stack(Board.getSize());
+        System.out.print("Enter the beginning square (1 to " + size * size + "): ");
+        int position = getPos(size); //Gets the starting position.
+
+        long moves = 0; //Keeps track of total moves made
+
+        Board b = new Board(size); //Creates board class
+        Stack stack = new Stack(size);
+        Knight knight = new Knight(position);
+        stack.push(knight);
+
+        while (!stack.isFull()) {
+            moves++;
+            if (stack.peak().getNextPos() != -1) {
+                   
+            } else if (stack.isEmpty()) {
+                System.out.print("\nFailure:\nTotal Number of Moves = " + moves + "\nMove Sequence : (" + position + ")");
+            } else {
+                b.unmark(stack.pop().getPosition());
+            }
+        }
     }//End of main
 
-    private static int size() {// Gets board size from user.
+    private static int getInt() {// Gets board size from user.
         Scanner in = new Scanner(System.in);
+        int val;
         while (true) {
-            if (in.hasNextInt()) {
-                return in.nextInt();
-            } else {
-                System.out.println("Please input an integer.");
-            }
-
+            try {
+                val = in.nextInt();
+                if (val > 0) {
+                    return val; //Returns a positive integer val
+                } else {
+                    System.out.print("Please input an integer greater than '0': ");
+                }
+            } catch (InputMismatchException e) {
+                in.nextLine();
+                System.out.print("Please input an integer: ");
+            } //End of try-catch block
         } //End of while
     }// End of size()
+
+    private static int getPos(int size) {
+        int val;
+        while (true) {
+            val = getInt();
+            if (val <= size * size) { //Makes sure value is within the bounds of the board
+                return val;
+            } else {
+                System.out.print("Please input an integer between 1 and " + size * size + ": ");
+            }
+        }//End while
+    }//End of position()
 }//End of KnightChessApp
 
 //--------------------------------------------------------------
@@ -106,23 +145,43 @@ class Board {//Start of Board class
 }//End of Board class
 
 //--------------------------------------------------------------
+class Stack {
 
-class Stack{
     private Knight[] stackArray;
     private int current;
-    
-    public Stack(int s){
-        stackArray = new Knight[s*s];
+
+    public Stack(int s) {
+        stackArray = new Knight[s * s]; // s*s is equal to the number of positions on the board
         current = 0;
-    }
-    
-    public void push(Knight k){
-        stackArray[current] = k;
+    }// End of Stack constructor
+
+    public void push(Knight k) {
+        stackArray[current] = k; //Puts node at the current end of stack
         current++;
+    }//End of push()
+
+    public Knight pop() {
+        current--; //Moves reference back up stack
+        return stackArray[current + 1]; // Returns the now dereferenced node
+    }//End of pop()
+
+    public Knight peak() {
+        return stackArray[current];
+    }//End of peak
+
+    public boolean isFull() {
+        if (current == stackArray.length) { // is the stack full?
+            return true; //yes
+        } else {
+            return false; // no
+        }
     }
-    
-    public Knight pop(){
-        current--;
-        return stackArray[current+1];
+
+    public boolean isEmpty() {
+        if (current == 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
-}
+}// End of Stack class
